@@ -2,6 +2,7 @@
 set -xeo pipefail
 
 function finish {
+    echo '################## END OF TEST ####################'
     kubectl get pods
     kubectl logs deployment/vault-operator
     kubectl describe pod -l name=vault-operator

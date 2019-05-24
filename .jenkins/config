@@ -1,0 +1,22 @@
+node ('docker') {
+    container ('go') {
+        stage ('Mod download')  {
+            sh 'go mod download'
+        }
+        stage ('License cache') {
+            sh 'make license-cache'
+        }
+        stage ('Check')  {
+            sh 'make check'
+        }
+    }
+    container ('docker')  {
+        stage ('docker build') {
+            sh 'apk add --update make git go'
+            sh 'make docker'
+            sh 'make docker-operator'
+            sh 'docker build -f Dockerfile.vault-env -t banzaicloud/vault-env:latest .'
+            sh 'docker build -f Dockerfile.webhook -t banzaicloud/vault-secrets-webhook:latest .'
+        }
+    }
+}

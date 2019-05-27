@@ -11,6 +11,9 @@ dependencies:
   tags:
     - kubernetes
   image: circleci/golang:1.12
+  except:
+    changes:
+      - **/*.md
   cache:
     key: "cache-${CI_PROJECT_PATH_SLUG}-${CI_COMMIT_REF_SLUG}"
     paths:

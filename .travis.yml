@@ -1,4 +1,6 @@
 sudo: required
+notifications:
+  email: false
 dist: xenial
 language: go
 go: "1.12"

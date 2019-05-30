@@ -1,0 +1,43 @@
+sudo: required
+notifications:
+  email: false
+dist: xenial
+language: go
+go: "1.12"
+env:
+  global:
+    - CHANGE_MINIKUBE_NONE_USER=true
+    - MINIKUBE_WANTUPDATENOTIFICATION=false
+    - MINIKUBE_WANTREPORTERRORPROMPT=false
+    - MINIKUBE_HOME=$HOME
+    - CHANGE_MINIKUBE_NONE_USER=true
+    - KUBECONFIG=$HOME/.kube/config
+    - GO111MODULE=on
+    - GOFLAG="-mod=readonly"
+    - VAULT_ADDR="http://localhost:8200"
+    - VAULT_TOKEN="227e1cce-6bf7-30bb-2d2a-acc854318caf"
+
+before_script:
+- |
+  curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.13.0/bin/linux/amd64/kubectl \
+    && chmod +x kubectl \
+    && sudo mv kubectl /usr/local/bin/
+- |
+  curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.35.0/minikube-linux-amd64 \
+    && chmod +x minikube \
+    && sudo mv minikube /usr/local/bin/
+- mkdir -p $HOME/.kube $HOME/.minikube
+- touch $KUBECONFIG
+- sudo minikube start --vm-driver=none --kubernetes-version=v1.13.0 
+- "sudo chown -R travis: /home/travis/.minikube/"
+- docker run -d -e SKIP_SETCAP=true -e VAULT_DEV_ROOT_TOKEN_ID=227e1cce-6bf7-30bb-2d2a-acc854318caf -p 8200:8200 vault:1.1.0
+
+script:
+- kubectl cluster-info
+- go mod download
+- make check
+- make docker VERSION=$TRAVIS_BRANCH
+- make docker-operator VERSION=$TRAVIS_BRANCH
+- docker build -f Dockerfile.vault-env -t banzaicloud/vault-env:latest .
+- docker build -f Dockerfile.webhook -t banzaicloud/vault-secrets-webhook:latest .
+- hack/acceptance-test.sh

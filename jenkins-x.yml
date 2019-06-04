@@ -1,12 +1,12 @@
-buildPack: go
 pipelineConfig:
-  agent: {}
   pipelines:
-    feature:
-      build:
-        steps:
-          - sh: ls -lhat
     pullRequest:
-      build:
-        steps:
-          - sh: ls -lhat
+      pipeline:
+        agent:
+          image: golang:1.12
+        stages:
+          - name: Test
+            steps:
+              - command: ls
+                args:
+                  - '-lha'

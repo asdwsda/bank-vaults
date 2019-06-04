@@ -1,0 +1,12 @@
+pipelineConfig:
+  pipelines:
+    pullRequest:
+      pipeline:
+        agent:
+          image: golang:1.12
+        stages:
+          - name: Test
+            steps:
+              - command: ls
+                args:
+                  - '-lha'
